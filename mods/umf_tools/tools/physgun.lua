@@ -23,7 +23,7 @@ function TOOL:GetTarget()
     return body, ray.hitpos, ray.dist
 end
 
-function TOOL:LeftClick()
+function TOOL:AttemptGrab()
     local body, hitpos, dist = self:GetTarget()
     if not body then return end
 
@@ -34,6 +34,11 @@ function TOOL:LeftClick()
     self.relative = grtr:ToLocal(hitpos)
     self.rotation = MakeTransformation(TransformToLocalTransform(GetPlayerTransform(), self.grabbed:GetTransform()))
     self.dist = dist
+    return self.grabbed
+end
+
+function TOOL:LeftClick()
+    if not self:AttemptGrab() then self.grabbing = true end
 end
 
 function TOOL:RightClick()
@@ -45,6 +50,7 @@ end
 
 function TOOL:LeftClickReleased()
     self.grabbed = nil
+    self.grabbing = false
     self.released = GetTime()
 end
 
@@ -56,8 +62,26 @@ function TOOL:MouseWheel(ds)
     end
 end
 
+function TOOL:DrawBeam(source, target, object, r, g, b)
+    local beamdata = {r=r, g=g, b=b}
+    if target == object then return render.drawline(source, target, beamdata) end
+    local prev = source
+    for i = 1, 7 do
+        local t = i/8
+        local t2 = t^1.3
+        local newpoint = source:Lerp(target, t2):Lerp(source:Lerp(object, t2), t)
+        render.drawline(prev, newpoint, beamdata)
+        prev = newpoint
+    end
+    render.drawline(prev, object, beamdata)
+end
+
 local offset = Vector(0.375,-0.425,-1.4)
 function TOOL:Tick()
+    local r, g, b = math.random(), math.random(), math.random()
+    local camtr = MakeTransformation(GetCameraTransform())
+    local nozzle = camtr:ToGlobal(offset)
+
     if not self.grabbed or not self.grabbed:IsValid() then
         if InputPressed("r") then
             local body = self:GetTarget()
@@ -65,24 +89,24 @@ function TOOL:Tick()
             body:SetDynamic(true)
             body:SetVelocity(Vector(0,0,0))
         end
+
+        if self.grabbing then
+            if self:AttemptGrab() then
+                self.grabbing = false
+                return
+            end
+            local ray = MakeTransformation(GetCameraTransform()):Raycast(100, -1)
+            self:DrawBeam(nozzle, ray.hitpos, ray.hitpos, r, g, b)
+        end
         return
     end
-    local r, g, b = math.random(), math.random(), math.random()
+
     self.grabbed:DrawOutline(r, g, b, 1)
     local bodytr = self.grabbed:GetTransform()
     local onbody = bodytr:ToGlobal(self.relative)
-    local camtr = MakeTransformation(GetCameraTransform())
     local aimpos = camtr:ToGlobal(Vector(0,0,-self.dist))
 
-    local nozzle = camtr:ToGlobal(offset)
-    local points = {[0] = nozzle}
-    for i = 1, 7 do
-        local t = i/8
-        local t2 = t^1.3
-        points[i] = nozzle:Lerp(aimpos, t2):Lerp(nozzle:Lerp(onbody, t2), t)
-    end
-    points[8] = onbody
-    for i = 1, 8 do render.drawline(points[i-1], points[i], {r=r, g=g, b=b}) end
+    self:DrawBeam(nozzle, aimpos, onbody, r, g, b)
 
     if DEBUG then
         DebugCross(onbody, 1, 0, 0)
