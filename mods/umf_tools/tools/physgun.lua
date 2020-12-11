@@ -97,7 +97,7 @@ function TOOL:Tick()
     self.grabbed:SetVelocity(force)
 
     if InputDown("e") then
-        if InputPressed("e") then
+        if not self.startrot then
             self.startrot = self.rotation.rot
             self.mousex, self.mousey = 0, 0
         end
@@ -107,6 +107,8 @@ function TOOL:Tick()
         dx, dy = dx - w/2, dy - h/2
         self.rotation.rot = QuatEuler((dy - self.mousey)/h*360,(dx - self.mousex)/w*360, 0) * self.rotation.rot
         self.mousex, self.mousey = dx, dy
+    else
+        self.startrot = nil
     end
 
     local nrot = TransformToParentTransform(GetPlayerTransform(), self.rotation)
