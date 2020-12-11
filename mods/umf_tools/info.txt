@@ -1,0 +1,3 @@
+name = UMF Tools
+author = Thomasims
+description = Example mod using the UMF

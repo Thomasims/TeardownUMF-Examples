@@ -1,0 +1,9 @@
+/*
+
+!/.gitignore
+!/README.md
+!/UNLICENSE
+
+!/mods/
+/mods/*
+!/mods/umf_tools/
