@@ -6,6 +6,8 @@ TOOL.order = 3
 TOOL.base = "gun"
 TOOL.suppress_default = true
 
+local DEBUG = false
+
 function TOOL:Initialize()
     self.released = 0
 end
@@ -71,13 +73,8 @@ function TOOL:Tick()
     local onbody = bodytr:ToGlobal(self.relative)
     local camtr = MakeTransformation(GetCameraTransform())
     local aimpos = camtr:ToGlobal(Vector(0,0,-self.dist))
-    DebugCross(onbody, 1, 0, 0)
-    DebugCross(aimpos, 0, 0, 1)
-    DebugLine(onbody, aimpos, 0, 1, 0)
 
     local nozzle = camtr:ToGlobal(offset)
-    DebugLine(nozzle, onbody, 1, 0, 0)
-    DebugLine(nozzle, aimpos, 0, 0, 1)
     local points = {[0] = nozzle}
     for i = 1, 7 do
         local t = i/8
@@ -86,6 +83,14 @@ function TOOL:Tick()
     end
     points[8] = onbody
     for i = 1, 8 do render.drawline(points[i-1], points[i], {r=r, g=g, b=b}) end
+
+    if DEBUG then
+        DebugCross(onbody, 1, 0, 0)
+        DebugCross(aimpos, 0, 0, 1)
+        DebugLine(onbody, aimpos, 0, 1, 0)
+        DebugLine(nozzle, onbody, 1, 0, 0)
+        DebugLine(nozzle, aimpos, 0, 0, 1)
+    end
 
     local dist = onbody:Distance(aimpos)
     local force = (aimpos - onbody) * 15
