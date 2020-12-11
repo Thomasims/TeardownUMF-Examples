@@ -1,6 +1,5 @@
 
-UMFTools_FlyEnabled = false
-local target
+local enabledvar = "game.mods.umftools.flying"
 
 local function aorb(a, b, d)
 	return (a and d or 0) - (b and d or 0)
@@ -10,9 +9,10 @@ local function incrouch()
 	return MakeVector(GetCameraTransform().pos):DistSquare(GetPlayerTransform().pos) < 2
 end
 
+local target
 hook.add("base.tick", "umftools.fly", function(dt)
-	if InputPressed("v") then UMFTools_FlyEnabled = not UMFTools_FlyEnabled target = nil end
-	if not UMFTools_FlyEnabled then return end
+	if InputPressed("v") then SetBool(enabledvar, not GetBool(enabledvar)) target = nil end
+	if not GetBool(enabledvar) then return end
 
 	local v = MakeVector(GetPlayerVelocity())
 	local current_pos = MakeVector(GetPlayerTransform().pos)
