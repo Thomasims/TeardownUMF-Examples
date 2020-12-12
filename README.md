@@ -5,5 +5,7 @@ As this is primarily a testbed for UMF functionality, _these mods will not work 
 
 # Installing
 
+***You can find a step-by-step guide [on the wiki](https://github.com/Thomasims/TeardownUMF-Examples/wiki/Installation-Guide).***
+
 - Install the latest version of the UMF, available [here](https://github.com/Thomasims/TeardownUMF/tree/0.5.0).
 - Place the mods you want to use in `Documents/Teardown/mods/`
