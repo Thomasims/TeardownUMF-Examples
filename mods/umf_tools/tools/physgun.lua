@@ -97,6 +97,7 @@ function TOOL:Tick()
             end
             local ray = MakeTransformation(GetCameraTransform()):Raycast(100, -1)
             self:DrawBeam(nozzle, ray.hitpos, ray.hitpos, r, g, b)
+            if not InputDown("lmb") then self:LeftClickReleased() end
         end
         return
     end
@@ -140,6 +141,8 @@ function TOOL:Tick()
     local diff = -Vector(p, y, r)
 
     self.grabbed:SetAngularVelocity(diff / 5)
+
+    if not InputDown("lmb") then self:LeftClickReleased() end
 end
 
 RegisterTool("physgun", TOOL)
