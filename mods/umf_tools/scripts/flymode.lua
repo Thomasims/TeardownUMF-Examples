@@ -22,7 +22,7 @@ hook.add("base.tick", "umftools.fly", function(dt)
 	if f or b or l or r or s then
 		local dist = incrouch() and 0.1 or 1
 		local fup = s and dist or 0
-		target = target + TransformToParentVec(GetCameraTransform(), Vec(aorb(r, l, dist), (f and fup or 0), aorb(b, not s and f, dist))) + Vec(0, (f and 0 or fup) + 0.0166666, 0)
+		target = target + TransformToParentVec(GetCameraTransform(), Vec(aorb(r, l, dist), (f and fup or 0), aorb(b, f, dist))) + Vec(0, (f and 0 or fup) + 0.0166666, 0)
 	end
 	SetPlayerVelocity((target - current_pos)*10)
 end)
