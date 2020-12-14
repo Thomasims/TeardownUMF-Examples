@@ -18,7 +18,7 @@ function TOOL:GetTarget()
     if not body then return end
 
     local min, max = body:GetWorldBounds()
-    if (min - max):Volume() > 8000 then return end -- I really don't want to accidentally grab the world.
+    if (min - max):Volume() > 64000 then return end -- I really don't want to accidentally grab the world.
 
     return body, ray.hitpos, ray.dist
 end
@@ -51,19 +51,19 @@ end
 function TOOL:LeftClickReleased()
     self.grabbed = nil
     self.grabbing = false
-    self.released = GetTime()
 end
 
 function TOOL:MouseWheel(ds)
-    if self.released > GetTime() - 0.5 then return true end
     if self.grabbed then
         self.dist = math.max(self.dist + ds, 2)
+        self.released = GetTime()
         return true
     end
+    if self.released > GetTime() - 0.5 then return true end
 end
 
 function TOOL:DrawBeam(source, target, object, r, g, b)
-    local beamdata = {r=r, g=g, b=b}
+    local beamdata = {r=r, g=g, b=b, sprite=render.white_fade_sprite}
     if target == object then return render.drawline(source, target, beamdata) end
     local prev = source
     for i = 1, 7 do
@@ -85,9 +85,10 @@ function TOOL:Tick()
     if not self.grabbed or not self.grabbed:IsValid() then
         if InputPressed("r") then
             local body = self:GetTarget()
-            if not body then return end
+            if body then
             body:SetDynamic(true)
             body:SetVelocity(Vector(0,0,0))
+        end
         end
 
         if self.grabbing then
@@ -95,7 +96,7 @@ function TOOL:Tick()
                 self.grabbing = false
                 return
             end
-            local ray = MakeTransformation(GetCameraTransform()):Raycast(100, -1)
+            local ray = camtr:Raycast(100, -1)
             self:DrawBeam(nozzle, ray.hitpos, ray.hitpos, r, g, b)
             if not InputDown("lmb") then self:LeftClickReleased() end
         end
