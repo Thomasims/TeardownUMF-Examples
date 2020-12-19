@@ -9,7 +9,8 @@ TOOL.suppress_default = true
 local DEBUG = false
 
 function TOOL:Initialize()
-    self.released = 0
+    self.mode = false
+    self.scrolllock = 0
 end
 
 function TOOL:GetTarget()
@@ -42,10 +43,20 @@ function TOOL:LeftClick()
 end
 
 function TOOL:RightClick()
-    if not self.grabbed then return end
-    self.grabbed:SetDynamic(false)
-    self.grabbed = nil
-    self.released = GetTime()
+    if self.grabbed then
+        self.effect = {
+            type = "freeze",
+            body = self.grabbed,
+            start = GetTime(),
+            time = 1
+        }
+        self.grabbed:SetVelocity(Vector(0,0,0))
+        self.grabbed:SetDynamic(false)
+        self.grabbed = nil
+        self.scrolllock = GetTime()
+    else
+        self.mode = not self.mode
+    end
 end
 
 function TOOL:LeftClickReleased()
@@ -56,10 +67,10 @@ end
 function TOOL:MouseWheel(ds)
     if self.grabbed then
         self.dist = math.max(self.dist + ds, 2)
-        self.released = GetTime()
+        self.scrolllock = GetTime()
         return true
     end
-    if self.released > GetTime() - 0.5 then return true end
+    if self.scrolllock > GetTime() - 0.5 then return true end
 end
 
 function TOOL:DrawBeam(source, target, object, r, g, b)
@@ -76,8 +87,28 @@ function TOOL:DrawBeam(source, target, object, r, g, b)
     render.drawline(prev, object, beamdata)
 end
 
+local effects = {
+    freeze = function(body, t)
+        body:DrawHighlight(.5 - t/2)
+        body:DrawOutline(t, .5+t/2, 1, 1 - t)
+    end,
+    unfreeze = function(body, t)
+        body:DrawHighlight(.5 - t/2)
+        body:DrawOutline(1, .5 + t/2, t, 1 - t)
+    end
+}
+
 local offset = Vector(0.375,-0.425,-1.4)
 function TOOL:Tick()
+    if self.effect then
+        local t = (GetTime() - self.effect.start) / self.effect.time
+        if t > 1 then
+            self.effect = nil
+        else
+            local f = effects[self.effect.type]
+            if f then f(self.effect.body, t) end
+        end
+    end
     local r, g, b = math.random(), math.random(), math.random()
     local camtr = MakeTransformation(GetCameraTransform())
     local nozzle = camtr:ToGlobal(offset)
@@ -86,9 +117,15 @@ function TOOL:Tick()
         if InputPressed("r") then
             local body = self:GetTarget()
             if body then
-            body:SetDynamic(true)
-            body:SetVelocity(Vector(0,0,0))
-        end
+                body:SetDynamic(true)
+                body:SetVelocity(Vector(0,0,0))
+                self.effect = {
+                    type = "unfreeze",
+                    body = body,
+                    start = GetTime(),
+                    time = 1
+                }
+            end
         end
 
         if self.grabbing then
@@ -144,6 +181,10 @@ function TOOL:Tick()
     self.grabbed:SetAngularVelocity(diff / 5)
 
     if not InputDown("lmb") then self:LeftClickReleased() end
+end
+
+function TOOL:GetAmmoString()
+    --return self.mode and "STATIC" or "DYNAMIC"
 end
 
 RegisterTool("physgun", TOOL)
