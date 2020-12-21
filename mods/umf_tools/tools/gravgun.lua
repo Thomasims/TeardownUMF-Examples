@@ -53,7 +53,7 @@ end
 
 function TOOL:FindBody(camtr, target, radius)
 	local rejected = {}
-	for i = 1, 20 do
+	for i = 1, 10 do
 		QueryRequire("dynamic")
 		for i = 1, #rejected do QueryRejectBody(rejected[i].handle) end
 		for i = 1, #self.grabbed do QueryRejectBody(self.grabbed[i].body.handle) end
@@ -63,7 +63,7 @@ function TOOL:FindBody(camtr, target, radius)
 		local body = Body(GetShapeBody(res.shape))
 		local min, max = body:GetWorldBounds()
 		if math.max(max[1] - min[1], max[2] - min[2], max[3] - min[3]) < radius + 2 then
-			local diff = target - (min + max) / 2
+			local diff = (min + max) / 2 - target
 			local len = diff:Length()
 			QueryRequire("static")
 			local h = QueryRaycast(target, diff/len, len)
