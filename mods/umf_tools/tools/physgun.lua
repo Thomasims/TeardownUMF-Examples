@@ -30,7 +30,7 @@ function TOOL:AttemptGrab()
 
     self.grabbed = body
     self.grabbed:SetDynamic(true)
-    self.grabbed:SetVelocity(Vector(0,0,0))
+    self.grabbed:SetVelocity(VEC_ZERO)
     local grtr = self.grabbed:GetTransform()
     self.relative = grtr:ToLocal(hitpos)
     self.rotation = MakeTransformation(TransformToLocalTransform(GetPlayerTransform(), self.grabbed:GetTransform()))
@@ -50,7 +50,8 @@ function TOOL:RightClick()
             start = GetTime(),
             time = 1
         }
-        self.grabbed:SetVelocity(Vector(0,0,0))
+        self.grabbed:SetVelocity(VEC_ZERO)
+        self.grabbed:SetAngularVelocity(VEC_ZERO)
         self.grabbed:SetDynamic(false)
         self.grabbed = nil
         self.scrolllock = GetTime()
