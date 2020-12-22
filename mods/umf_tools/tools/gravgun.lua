@@ -101,7 +101,9 @@ function TOOL:Tick()
 				local starget = object.body:GetTransform():ToGlobal(object.offset)
 				local diff = target - starget
 				object.body:SetVelocity(diff*4)
-				object.body:DrawOutline(r, g, b, 1)
+				--object.body:DrawOutline(r, g, b, 1)
+				--object.body:DrawHighlight(.4)
+				--DebugLine(target, starget, r, g, b, 1)
 				if diff:Length() > radius * 10 then
 					self.volume = self.volume - self.grabbed[i].volume
 					table.remove(self.grabbed, i)
