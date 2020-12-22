@@ -140,6 +140,12 @@ function TOOL:Tick()
         return
     end
 
+    if InputPressed("r") then
+        self.grabbed:SetVelocity(camtr.rot:Forward() * -100)
+        self.grabbed = nil
+        return
+    end
+
     self.grabbed:DrawOutline(r, g, b, 1)
     local bodytr = self.grabbed:GetTransform()
     local onbody = bodytr:ToGlobal(self.relative)
