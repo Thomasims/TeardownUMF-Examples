@@ -103,7 +103,7 @@ local offset = Vector(0.375,-0.425,-1.4)
 function TOOL:Tick()
     if self.effect then
         local t = (GetTime() - self.effect.start) / self.effect.time
-        if t > 1 then
+        if t > 1 or not self.effect.body:IsValid() then
             self.effect = nil
         else
             local f = effects[self.effect.type]
